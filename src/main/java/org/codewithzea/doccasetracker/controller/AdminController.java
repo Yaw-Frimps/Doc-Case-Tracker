@@ -3,7 +3,9 @@ package org.codewithzea.doccasetracker.controller;
 import lombok.RequiredArgsConstructor;
 import org.codewithzea.doccasetracker.dto.response.ApiResponse;
 import org.codewithzea.doccasetracker.dto.response.ApprovalStatusResponse;
+import org.codewithzea.doccasetracker.dto.response.AuditLogResponse;
 import org.codewithzea.doccasetracker.service.AdminService;
+import org.codewithzea.doccasetracker.service.AuditLogService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AuditLogService auditLogService;
 
     @PutMapping("/users/{id}/approve")
     public ResponseEntity<ApiResponse<ApprovalStatusResponse>> approveUser(
@@ -68,4 +71,74 @@ public class AdminController {
 
         return ResponseEntity.ok(ApiResponse.success("User successfully deleted"));
     }
+
+
+    /********************         AUDIT LOGS FOR ADMIN       ***************************************/
+
+    @GetMapping("/audit-logs")
+    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogs(
+            Pageable pageable
+    ) {
+
+        Page<AuditLogResponse> response =
+                auditLogService.getLogs(pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Audit logs successfully retrieved",
+                        response
+                )
+        );
+    }
+
+    @GetMapping("/audit-logs/recent")
+    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getRecentLogs(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+
+        Page<AuditLogResponse> response =
+                auditLogService.getRecentLogs(limit);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Recent audit logs retrieved successfully",
+                        response
+                )
+        );
+    }
+
+    @GetMapping("/audit-logs/user/{email}")
+    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogsByUser(
+            @PathVariable String email,
+            Pageable pageable
+    ) {
+
+        Page<AuditLogResponse> response =
+                auditLogService.getLogsByUser(email, pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "User audit logs retrieved successfully",
+                        response
+                )
+        );
+    }
+
+    @GetMapping("/audit-logs/user/{userId}")
+    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogsByUserId(
+            @PathVariable String userId,
+            Pageable pageable
+    ) {
+
+        Page<AuditLogResponse> response =
+                auditLogService.getLogsByUserId(userId, pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "User audit logs retrieved successfully",
+                        response
+                )
+        );
+    }
+
 }

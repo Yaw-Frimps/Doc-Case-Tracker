@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>DocCaseTracker Email Header</title>
+</head>
+
+<body>
+
+<div th:fragment="header">
+
+    <table
+            style="
+            width:100%;
+            border-collapse:collapse;
+            background:#0F172A;
+            padding:30px;
+            border-radius:12px 12px 0 0;">
+
+        <thead>
+        <tr>
+            <th scope="col" style="display:none;">
+                DocCaseTracker Header
+            </th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <td style="text-align:center;">
+
+                <h1 style="
+                    color:#ffffff;
+                    margin:0;
+                    font-family:'Segoe UI',sans-serif;
+                    font-size:28px;
+                    font-weight:700;">
+                    DocCaseTracker
+                </h1>
+
+                <p style="
+                    color:#CBD5E1;
+                    margin-top:10px;
+                    font-size:14px;">
+                    Secure Medical Case Management Platform
+                </p>
+
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+</html>

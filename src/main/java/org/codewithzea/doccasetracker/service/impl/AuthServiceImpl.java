@@ -17,7 +17,6 @@ import org.codewithzea.doccasetracker.service.OtpService;
 import org.codewithzea.doccasetracker.service.AuditLogService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
+
+import static org.codewithzea.doccasetracker.service.impl.AuditActions.*;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,8 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final OtpService otpService;
     private final AuditLogService auditLogService;
+
+    private final UserQueryService userQueryService;
 
     @Value("${app.jwt.refreshTokenExpirationMs}")
     private long refreshTokenExpirationMs;
@@ -107,7 +110,8 @@ public class AuthServiceImpl implements AuthService {
 
         log.debug("REGISTER: Tokens generated for userId={}", savedUser.getId());
 
-        auditLogService.log("User Registration", savedUser.getEmail());
+        audit(USER_REGISTERED,user,"New User registered", "USER");
+
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -121,14 +125,6 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
 
         log.debug("LOGIN: Attempt start email={}", request.getEmail());
-
-//        User user = userRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> {
-//                    log.warn("LOGIN: User not found email={}", request.getEmail());
-//                    return new InvalidCredentialsException("Invalid credentials");
-//                });
-//
-//        log.debug("LOGIN: User loaded id={} email={}", user.getId(), user.getEmail());
 
 
         Authentication authentication = authenticationManager.authenticate(
@@ -146,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("LOGIN: Successful login userId={} email={}", user.getId(), user.getEmail());
 
-        auditLogService.log("User Login", user.getEmail());
+        audit(USER_LOGIN,user,"User logged into the system", "AUTH");
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -202,7 +198,8 @@ public class AuthServiceImpl implements AuthService {
                     User user = rt.getUser();
 
                     if (user != null) {
-                        auditLogService.log("User Logout", user.getEmail());
+                        audit(USER_LOGOUT,user,"User logged out", "AUTH");
+
                         log.info("LOGOUT: Success userId={} email={}", user.getId(), user.getEmail());
                     }
 
@@ -218,13 +215,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.debug("FORGOT_PASSWORD: Request received email={}", request.getEmail());
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> {
-                    log.warn("FORGOT_PASSWORD: No user found for email={}", request.getEmail());
-                    return new UserNotFoundException(
-                            "No account registered with email: " + request.getEmail()
-                    );
-                });
+        User user = userQueryService.getUserByEmail(request.getEmail());
 
         log.info("FORGOT_PASSWORD: User found id={} email={}", user.getId(), user.getEmail());
 
@@ -236,7 +227,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("FORGOT_PASSWORD: OTP sent successfully email={}", user.getEmail());
 
-        auditLogService.log("Requested Password Reset OTP", user.getEmail());
+        audit(PASSWORD_RESET_OTP_REQUESTED,user,"User requested password reset OTP", "AUTH");
 
         log.debug("FORGOT_PASSWORD: Process completed email={}", user.getEmail());
     }
@@ -244,10 +235,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public boolean verifyOtp(VerifyOtpRequest request) {
-        boolean verified = otpService.verifyOtp(request.getEmail(), request.getOtp());
+
+        boolean verified =
+                otpService.verifyOtp(
+                        request.getEmail(),
+                        request.getOtp()
+                );
+
         if (verified) {
-            auditLogService.log("Verified Password Reset OTP", request.getEmail());
+
+            User user = userQueryService.getUserByEmail(request.getEmail());
+
+            audit(PASSWORD_RESET_OTP_VERIFIED,user,"User verified password reset OTP", "AUTH");
+
         }
+
         return verified;
     }
 
@@ -259,8 +261,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException("Passwords do not match");
         }
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserNotFoundException("No account registered with email: " + request.getEmail()));
+        User user = userQueryService.getUserByEmail(request.getEmail());
 
         if (!otpService.isOtpVerifiedAndValid(user.getEmail(), request.getOtp())) {
             throw new InvalidOtpException("OTP code is invalid or has not been verified yet");
@@ -273,7 +274,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenRepository.deleteByUser(user);
         emailService.sendPasswordResetConfirmationEmail(user.getEmail());
 
-        auditLogService.log("Reset Password Success", user.getEmail());
+        audit(PASSWORD_RESET,user,"Password reset successfully","USER");
     }
 
     @Override
@@ -311,7 +312,7 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("REFRESH: Token rotated userId={}", user.getId());
 
-        auditLogService.log("Rotated Refresh Token", user.getEmail());
+        audit(REFRESH_TOKEN_ROTATED,user,"Refresh Token rotated", "AUTH");
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -346,10 +347,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    @Cacheable(value = "users", key = "#email")
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    private void audit(String action, User user, String details, String entityType) {
+        auditLogService.log(
+                action,
+                entityType,
+                user.getId(),
+                details,
+                user.getEmail(),
+                user.getId(),
+                user.getRole().getName().name()
+        );
     }
 
 }

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body style="background:#F8FAFC;padding:40px;font-family:'Segoe UI',sans-serif;">
+
+<div style="
+max-width:650px;
+margin:auto;
+background:white;
+border-radius:12px;
+box-shadow:0 5px 20px rgba(0,0,0,0.08);">
+
+    <div th:replace="~{email/layout/header :: header}"></div>
+
+    <div style="padding:40px;">
+
+        <div style="text-align:center;">
+            <div style="font-size:60px;">⚠️</div>
+        </div>
+
+        <h2 style="color:#DC2626;">
+            Account Request Rejected
+        </h2>
+
+        <p>
+            Hello <strong th:text="${fullName}"></strong>,
+        </p>
+
+        <p>
+            We regret to inform you that your account request
+            was not approved.
+        </p>
+
+        <p>
+            If you believe this decision was made in error,
+            please contact the system administrator.
+        </p>
+
+    </div>
+
+    <div th:replace="~{email/layout/footer :: footer}"></div>
+
+</div>
+
+</body>
+</html>

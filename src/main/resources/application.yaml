@@ -1,6 +1,3 @@
-server:
-  port: 8081
-
 spring:
   application:
     name: DocCaseTracker
@@ -55,3 +52,9 @@ logging:
     root: INFO
     org.springframework.web: DEBUG
     com.example.doccasetracker: DEBUG
+
+server:
+  port: 8081
+
+
+kind: Application
