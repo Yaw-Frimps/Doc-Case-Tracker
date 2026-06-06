@@ -1,4 +1,4 @@
-package org.codewithzea.doccasetracker.service.impl;
+package org.codewithzea.doccasetracker.util;
 
 import lombok.RequiredArgsConstructor;
 import org.codewithzea.doccasetracker.entity.User;

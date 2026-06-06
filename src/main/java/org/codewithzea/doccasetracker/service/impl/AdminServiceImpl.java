@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-import static org.codewithzea.doccasetracker.service.impl.AuditActions.*;
+import static org.codewithzea.doccasetracker.util.AuditActions.*;
 
 @Service
 @RequiredArgsConstructor

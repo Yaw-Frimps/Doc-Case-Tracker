@@ -15,6 +15,7 @@ import org.codewithzea.doccasetracker.service.AuthService;
 import org.codewithzea.doccasetracker.service.EmailService;
 import org.codewithzea.doccasetracker.service.OtpService;
 import org.codewithzea.doccasetracker.service.AuditLogService;
+import org.codewithzea.doccasetracker.util.UserQueryService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.codewithzea.doccasetracker.service.impl.AuditActions.*;
+import static org.codewithzea.doccasetracker.util.AuditActions.*;
 
 @Service
 @RequiredArgsConstructor

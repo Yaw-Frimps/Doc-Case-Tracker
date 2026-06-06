@@ -1,4 +1,4 @@
-package org.codewithzea.doccasetracker.service.impl;
+package org.codewithzea.doccasetracker.util;
 
 public final class AuditActions {
     private AuditActions() {}
@@ -27,4 +27,14 @@ public final class AuditActions {
 
     public static final String USER_DELETED =
             "USER_DELETED";
+
+    public static final String DOCTOR_CREATED = "DOCTOR_CREATED";
+
+    public static final String DOCTOR_UPDATED = "DOCTOR_UPDATED";
+
+    public static final String DOCTOR_DELETED = "DOCTOR_DELETED";
+
+    public static final String DOCTOR_ACTIVATED = "DOCTOR_ACTIVATED";
+
+    public static final String DOCTOR_DEACTIVATED = "DOCTOR_DEACTIVATED";
 }
