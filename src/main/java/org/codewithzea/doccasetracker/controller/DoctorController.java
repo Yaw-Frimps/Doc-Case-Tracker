@@ -73,7 +73,7 @@ public class DoctorController {
     }
 
     @PatchMapping("/{doctorId}/activate")
-    public ResponseEntity<ApiResponse<DoctorResponse>> activateDoctor(@PathVariable String doctorId){
+    public ResponseEntity<ApiResponse<DoctorResponse>> activateDoctor(@PathVariable String doctorId) {
         DoctorResponse response = doctorService.activateDoctor(doctorId);
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -85,7 +85,7 @@ public class DoctorController {
     }
 
     @PatchMapping("/{doctorId}/deactivate")
-    public ResponseEntity<ApiResponse<DoctorResponse>> deactivateDoctor(@PathVariable String doctorId){
+    public ResponseEntity<ApiResponse<DoctorResponse>> deactivateDoctor(@PathVariable String doctorId) {
         DoctorResponse response = doctorService.deactivateDoctor(doctorId);
         return ResponseEntity.ok(
                 ApiResponse.success(
@@ -114,7 +114,7 @@ public class DoctorController {
     public ResponseEntity<ApiResponse<Page<DoctorResponse>>> getDoctorsBySpecialty(
             @PathVariable String specialtyId,
             Pageable pageable
-            ) {
+    ) {
         Page<DoctorResponse> response =
                 doctorService.getDoctorsBySpecialty(specialtyId, pageable);
         return ResponseEntity.ok(
@@ -134,6 +134,33 @@ public class DoctorController {
 
         return ResponseEntity.ok(
                 ApiResponse.success("Doctor deleted successfully")
+        );
+    }
+
+    @GetMapping("/deleted")
+    public ResponseEntity<ApiResponse<Page<DoctorResponse>>> getDeletedDoctors(
+            Pageable pageable
+    ) {
+        Page<DoctorResponse> response =
+                doctorService.getDeletedDoctors(pageable);
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Deleted doctors retrieved successfully",
+                        response
+                )
+        );
+    }
+
+    @PatchMapping("/{doctorId}/restore")
+    public ResponseEntity<ApiResponse<DoctorResponse>> restoreDoctor(
+            @PathVariable String doctorId
+    ) {
+        DoctorResponse response = doctorService.restoreDoctor(doctorId);
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Doctor restored successfully",
+                        response
+                )
         );
     }
 }

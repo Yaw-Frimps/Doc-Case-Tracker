@@ -109,7 +109,7 @@ public class DoctorServiceImpl implements DoctorService {
         log.debug("Fetching doctors page={}",
                 pageable.getPageNumber());
 
-        return doctorRepository.findAll(pageable)
+        return doctorRepository.findAllByDeletedFalse(pageable)
                 .map(doctorMapper::toResponse);
     }
 
@@ -274,6 +274,11 @@ public class DoctorServiceImpl implements DoctorService {
                 .map(doctorMapper::toResponse);
     }
 
+    public Page<DoctorResponse> getDeletedDoctors(Pageable pageable) {
+        return doctorRepository.findAllByDeletedTrue(pageable)
+                .map(doctorMapper::toResponse);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Page<DoctorResponse> getDoctorsBySpecialty(
@@ -289,9 +294,28 @@ public class DoctorServiceImpl implements DoctorService {
                 .map(doctorMapper::toResponse);
     }
 
+    @Transactional
+    @CacheEvict(value = {DOCTOR_CACHE, DOCTORS_CACHE}, allEntries = true)
+    public DoctorResponse restoreDoctor(String doctorId) {
+
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Doctor not found with id: " + doctorId));
+
+        doctor.setDeleted(false);
+        doctor.setDeletedAt(null);
+        doctor.setStatus(DoctorStatus.ACTIVE);
+
+        return doctorMapper.toResponse(
+                doctorRepository.save(doctor)
+        );
+    }
+
     private Doctor getDoctorOrThrow(String doctorId) {
 
-        return doctorRepository.findById(doctorId)
+        return doctorRepository
+                .findByDoctorIdAndDeletedFalse(doctorId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Doctor not found with id: " + doctorId

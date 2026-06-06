@@ -25,6 +25,10 @@ public interface DoctorService {
 
     DoctorResponse deactivateDoctor(String doctorId);
 
+    Page<DoctorResponse> getDeletedDoctors(Pageable pageable);
+
+    DoctorResponse restoreDoctor(String doctorId);
+
     Page<DoctorResponse> searchDoctors(
             String keyword,
             Pageable pageable

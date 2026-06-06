@@ -16,6 +16,8 @@ public interface DoctorRepository extends JpaRepository<Doctor, String> {
 
     Page<Doctor> findAllByDeletedFalse(Pageable pageable);
 
+    Page<Doctor> findAllByDeletedTrue(Pageable pageable);
+
     Page<Doctor> findBySpecialization_IdAndDeletedFalse(
             String specialtyId,
             Pageable pageable
