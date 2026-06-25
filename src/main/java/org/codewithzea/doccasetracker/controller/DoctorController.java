@@ -97,11 +97,15 @@ public class DoctorController {
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<DoctorResponse>>> searchDoctors(
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String search,
             Pageable pageable
     ) {
+
+        String query = keyword != null ? keyword : search;
+
         Page<DoctorResponse> response =
-                doctorService.searchDoctors(keyword, pageable);
+                doctorService.searchDoctors(query, pageable);
         return ResponseEntity.ok(
                 ApiResponse.success(
                         "Doctors retrieved successfully",

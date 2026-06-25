@@ -267,6 +267,11 @@ public class DoctorServiceImpl implements DoctorService {
             Pageable pageable
     ) {
 
+        if (keyword == null || keyword.isBlank()) {
+            return doctorRepository.findAllByDeletedFalse(pageable)
+                    .map(doctorMapper::toResponse);
+        }
+
         log.debug("Searching doctors keyword={}", keyword);
 
         return doctorRepository

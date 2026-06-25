@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -45,6 +44,7 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "account_status", nullable = false, length = 50)
+    @Builder.Default
     private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
 
     @Builder.Default

@@ -198,14 +198,14 @@ public class AuthServiceImpl implements AuthService {
 
                     User user = rt.getUser();
 
-                    if (user != null) {
-                        audit(USER_LOGOUT,user,"User logged out", "AUTH");
+                    rt.setRevoked(true);
+                    refreshTokenRepository.save(rt);
 
-                        log.info("LOGOUT: Success userId={} email={}", user.getId(), user.getEmail());
+                    if (user != null) {
+                        audit(USER_LOGOUT, user, "User logged out", "AUTH");
                     }
 
-                    refreshTokenRepository.delete(rt);
-                    log.debug("LOGOUT: Refresh token deleted");
+                    log.info("LOGOUT: Success userId={} email={}", user.getId(), user.getEmail());
 
                 }, () -> log.warn("LOGOUT: Token not found in DB"));
     }
@@ -258,6 +258,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @CacheEvict(value = "users", key = "#request.email")
     public void resetPassword(ResetPasswordRequest request) {
+
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new InvalidCredentialsException("Passwords do not match");
         }
@@ -272,10 +273,19 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         otpService.markOtpAsUsed(user.getEmail(), request.getOtp());
-        refreshTokenRepository.deleteByUser(user);
+
+        // 🔥 SAFE REFRESH TOKEN INVALIDATION
+        refreshTokenRepository.findAll()
+                .stream()
+                .filter(rt -> rt.getUser().getId().equals(user.getId()))
+                .forEach(rt -> {
+                    rt.setRevoked(true);
+                    refreshTokenRepository.save(rt);
+                });
+
         emailService.sendPasswordResetConfirmationEmail(user.getEmail());
 
-        audit(PASSWORD_RESET,user,"Password reset successfully","USER");
+        audit(PASSWORD_RESET, user, "Password reset successfully", "USER");
     }
 
     @Override
@@ -292,13 +302,11 @@ public class AuthServiceImpl implements AuthService {
 
         if (token.isRevoked()) {
             log.warn("REFRESH: Token revoked userId={}", token.getUser().getId());
-            refreshTokenRepository.delete(token);
             throw new InvalidCredentialsException("Refresh token was revoked");
         }
 
         if (token.getExpiryDate().isBefore(Instant.now())) {
             log.warn("REFRESH: Token expired userId={}", token.getUser().getId());
-            refreshTokenRepository.delete(token);
             throw new RefreshTokenExpiredException("Refresh token has expired. Please log in again.");
         }
 
@@ -306,14 +314,17 @@ public class AuthServiceImpl implements AuthService {
 
         log.debug("REFRESH: Token valid userId={}", user.getId());
 
-        String accessToken = jwtUtils.generateToken(user);
-        refreshTokenRepository.delete(token);
+        // 🔥 SAFE: revoke instead of delete (prevents race conditions)
+        token.setRevoked(true);
+        refreshTokenRepository.save(token);
 
+        // generate new tokens
+        String accessToken = jwtUtils.generateToken(user);
         RefreshToken newRefreshToken = createRefreshToken(user);
 
         log.info("REFRESH: Token rotated userId={}", user.getId());
 
-        audit(REFRESH_TOKEN_ROTATED,user,"Refresh Token rotated", "AUTH");
+        audit(REFRESH_TOKEN_ROTATED, user, "Refresh Token rotated", "AUTH");
 
         return AuthResponse.builder()
                 .accessToken(accessToken)

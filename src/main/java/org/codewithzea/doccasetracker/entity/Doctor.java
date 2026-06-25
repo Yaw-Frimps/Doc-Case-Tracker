@@ -56,6 +56,7 @@ public class Doctor {
     private DoctorStatus status;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean deleted = false;
 
     @Column(name = "deleted_at")

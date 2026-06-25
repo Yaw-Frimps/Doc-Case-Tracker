@@ -107,22 +107,22 @@ public class AdminController {
         );
     }
 
-    @GetMapping("/audit-logs/user/{email}")
-    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogsByUser(
-            @PathVariable String email,
-            Pageable pageable
-    ) {
-
-        Page<AuditLogResponse> response =
-                auditLogService.getLogsByUser(email, pageable);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "User audit logs retrieved successfully",
-                        response
-                )
-        );
-    }
+//    @GetMapping("/audit-logs/user/{email}")
+//    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogsByUser(
+//            @PathVariable String email,
+//            Pageable pageable
+//    ) {
+//
+//        Page<AuditLogResponse> response =
+//                auditLogService.getLogsByUser(email, pageable);
+//
+//        return ResponseEntity.ok(
+//                ApiResponse.success(
+//                        "User audit logs retrieved successfully",
+//                        response
+//                )
+//        );
+//    }
 
     @GetMapping("/audit-logs/user/{userId}")
     public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogsByUserId(

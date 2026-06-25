@@ -6,6 +6,7 @@ import org.codewithzea.doccasetracker.entity.ApprovalStatus;
 import org.codewithzea.doccasetracker.entity.User;
 import org.codewithzea.doccasetracker.exception.UserNotFoundException;
 import org.codewithzea.doccasetracker.mapper.ApprovalStatusMapper;
+import org.codewithzea.doccasetracker.repository.RefreshTokenRepository;
 import org.codewithzea.doccasetracker.repository.UserRepository;
 import org.codewithzea.doccasetracker.service.AdminService;
 import org.codewithzea.doccasetracker.service.AuditLogService;
@@ -34,6 +35,7 @@ public class AdminServiceImpl implements AdminService {
     private final AuditLogService auditLogService;
     private final ApprovalStatusMapper approvalStatusMapper;
     private final EmailService emailService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // ---------------- CACHE KEYS ----------------
     private static final String CACHE_USERS = "users";
@@ -107,6 +109,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = {CACHE_USERS, CACHE_USER_BY_ID, CACHE_PENDING_USERS, CACHE_APPROVED_USERS}, allEntries = true)
     public void deleteUser(String id) {
 
@@ -123,6 +126,8 @@ public class AdminServiceImpl implements AdminService {
                 admin.getId(),
                 admin.getRole().getName().name()
         );
+
+        refreshTokenRepository.deleteAllByUserId(user.getId());
 
         userRepository.delete(user);
     }

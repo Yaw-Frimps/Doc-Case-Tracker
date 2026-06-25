@@ -37,4 +37,14 @@ public final class AuditActions {
     public static final String DOCTOR_ACTIVATED = "DOCTOR_ACTIVATED";
 
     public static final String DOCTOR_DEACTIVATED = "DOCTOR_DEACTIVATED";
+
+    public static final String CASE_CREATED = "CASE_CREATED";
+    public static final String CASE_UPDATED = "CASE_UPDATED";
+    public static final String CASE_DELETED = "CASE_DELETED";
+
+    public static final String TEST_CREATED = "TEST_CREATED";
+    public static final String TEST_UPDATED = "TEST_UPDATED";
+    public static final String TEST_DELETED = "TEST_DELETED";
+    public static final String TEST_ACTIVATED = "TEST_ACTIVATED";
+    public static final String TEST_DEACTIVATED = "TEST_DEACTIVATED";
 }

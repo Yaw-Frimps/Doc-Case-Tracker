@@ -1,6 +1,7 @@
 package org.codewithzea.doccasetracker.repository;
 
 import org.codewithzea.doccasetracker.entity.Doctor;
+import org.codewithzea.doccasetracker.entity.DoctorStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,6 +40,10 @@ public interface DoctorRepository extends JpaRepository<Doctor, String> {
             Pageable pageable
     );
 
+
+    long countByDeletedFalse();
+
+    long countByDeletedFalseAndStatus(DoctorStatus status);
     boolean existsByEmail(String email);
 
     boolean existsByPhoneNumber(String phoneNumber);
