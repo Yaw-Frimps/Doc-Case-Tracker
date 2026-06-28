@@ -37,7 +37,7 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     accessTokenExpirationMs: 900000 # 15 minutes
-    refreshTokenExpirationMs: 604800000 # 7 days
+    refreshTokenExpirationMs: 86400000 # 1 day
     issuer: DocCaseTrackerSecurity
 
 springdoc:

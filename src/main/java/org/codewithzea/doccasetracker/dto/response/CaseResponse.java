@@ -4,6 +4,7 @@ package org.codewithzea.doccasetracker.dto.response;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,10 +20,7 @@ public class CaseResponse {
 
     private String patientName;
 
-    private Integer numberOfCases;
-
-    private String testId;
-    private String testName;
+    private List<TestResponse> tests;
 
     private LocalDateTime createdAt;
 

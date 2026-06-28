@@ -9,14 +9,13 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(
         componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        uses = {CaseTestMapper.class}
 )
 public interface CaseMapper {
 
     @Mapping(target = "doctorId", source = "doctor.doctorId")
     @Mapping(target = "doctorName", source = "doctor.fullName")
-
-    @Mapping(source = "test.id", target = "testId")
-    @Mapping(source = "test.testName", target = "testName")
+    @Mapping(target = "tests", source = "caseTests")
     CaseResponse toResponse(Cases cases);
 }

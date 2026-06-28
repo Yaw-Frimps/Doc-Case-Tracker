@@ -136,7 +136,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CACHE_USERS, key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+//    @Cacheable(value = CACHE_USERS, key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ApprovalStatusResponse> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable)
                 .map(approvalStatusMapper::toResponse);
@@ -144,7 +144,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CACHE_PENDING_USERS, key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+//    @Cacheable(value = CACHE_PENDING_USERS, key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ApprovalStatusResponse> getPendingUsers(Pageable pageable) {
         return userRepository.findAllByApprovalStatus(ApprovalStatus.PENDING, pageable)
                 .map(approvalStatusMapper::toResponse);
@@ -152,7 +152,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CACHE_APPROVED_USERS, key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+//    @Cacheable(value = CACHE_APPROVED_USERS, key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ApprovalStatusResponse> getApprovedUsers(Pageable pageable) {
         return userRepository.findAllByApprovalStatus(ApprovalStatus.APPROVED, pageable)
                 .map(approvalStatusMapper::toResponse);

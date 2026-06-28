@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "cases")
@@ -25,16 +27,14 @@ public class Cases {
 
     private String patientName;
 
-    private Integer numberOfCases;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "test_id", nullable = false)
-    private Test test;
+    @OneToMany(mappedBy = "cases", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaseTest> caseTests = new ArrayList<>();
 
     private boolean deleted;
 
     private LocalDateTime deletedAt;
 
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.codewithzea.doccasetracker.dto.request.CreateCaseRequest;
 import org.codewithzea.doccasetracker.dto.request.UpdateCaseRequest;
 import org.codewithzea.doccasetracker.dto.response.CaseResponse;
-import org.codewithzea.doccasetracker.entity.Cases;
-import org.codewithzea.doccasetracker.entity.Doctor;
-import org.codewithzea.doccasetracker.entity.Test;
-import org.codewithzea.doccasetracker.entity.User;
+import org.codewithzea.doccasetracker.entity.*;
 import org.codewithzea.doccasetracker.exception.ResourceNotFoundException;
 import org.codewithzea.doccasetracker.mapper.CaseMapper;
 import org.codewithzea.doccasetracker.repository.CaseRepository;
@@ -25,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.codewithzea.doccasetracker.util.AuditActions.*;
 
@@ -55,21 +53,18 @@ public class CaseServiceImpl implements CaseService {
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new ResourceNotFoundException(DOCTOR_NOT_FOUND));
 
-        Test test = testRepository.findById(request.getTestId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Test not found"));
+        List<Test> tests = getTests(request.getTestIds());
 
         Cases cases = Cases.builder()
                 .doctor(doctor)
                 .patientName(request.getPatientName())
-                .numberOfCases(request.getNumberOfCases())
-                .test(test)
                 .deleted(false)
                 .build();
 
+        cases.setCaseTests(buildCaseTests(cases, tests));
+
         Cases saved = caseRepository.save(cases);
 
-        // 👇 AUDIT LOG
         User admin = userProvider.getCurrentUser();
 
         auditLogService.log(
@@ -123,6 +118,7 @@ public class CaseServiceImpl implements CaseService {
         if (request.getDoctorId() != null) {
             Doctor doctor = doctorRepository.findById(request.getDoctorId())
                     .orElseThrow(() -> new ResourceNotFoundException(DOCTOR_NOT_FOUND));
+
             cases.setDoctor(doctor);
         }
 
@@ -130,22 +126,17 @@ public class CaseServiceImpl implements CaseService {
             cases.setPatientName(request.getPatientName());
         }
 
-        if (request.getNumberOfCases() != null) {
-            cases.setNumberOfCases(request.getNumberOfCases());
-        }
 
-        if (request.getTestId() != null) {
+        if (request.getTestIds() != null && !request.getTestIds().isEmpty()) {
 
-            Test test = testRepository.findById(request.getTestId())
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException("Test not found"));
+            List<Test> tests = getTests(request.getTestIds());
 
-            cases.setTest(test);
+            cases.getCaseTests().clear();
+            cases.getCaseTests().addAll(buildCaseTests(cases, tests));
         }
 
         Cases updated = caseRepository.save(cases);
 
-        // 👇 AUDIT LOG
         User admin = userProvider.getCurrentUser();
 
         auditLogService.log(
@@ -191,5 +182,30 @@ public class CaseServiceImpl implements CaseService {
         );
 
         log.info("Case soft deleted: {}", id);
+    }
+
+
+    private List<Test> getTests(List<String> testIds) {
+
+        List<Test> tests = testRepository.findAllById(testIds);
+
+        if (tests.size() != testIds.size()) {
+            throw new ResourceNotFoundException("One or more tests not found");
+        }
+
+        return tests;
+    }
+
+    private List<CaseTest> buildCaseTests(Cases cases, List<Test> tests) {
+
+        return tests.stream()
+                .map(test -> CaseTest.builder()
+                        .cases(cases)
+                        .test(test)
+                        .testNameAtTime(test.getTestName())
+                        .priceAtTime(test.getPrice())
+                        .commissionAtTime(test.getCommission())
+                        .build())
+                .toList();
     }
 }

@@ -6,7 +6,9 @@ package org.codewithzea.doccasetracker.service;
 import org.codewithzea.doccasetracker.dto.request.CreateTestRequest;
 import org.codewithzea.doccasetracker.dto.request.UpdateTestRequest;
 import org.codewithzea.doccasetracker.dto.response.TestResponse;
+import org.springframework.data.domain.Page;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 public interface TestService {

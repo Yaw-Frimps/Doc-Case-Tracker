@@ -12,4 +12,6 @@ public class TopDoctorResponse {
     private String doctorName;
 
     private Long totalCases;
+
+    private long totalTests;
 }

@@ -2,6 +2,8 @@ package org.codewithzea.doccasetracker.dto.request;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UpdateCaseRequest {
 
@@ -9,7 +11,5 @@ public class UpdateCaseRequest {
 
     private String patientName;
 
-    private Integer numberOfCases;
-
-    private String testId;
+    private List<String> testIds;
 }
