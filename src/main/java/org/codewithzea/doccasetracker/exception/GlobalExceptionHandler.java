@@ -46,6 +46,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalStateException(
+            IllegalStateException ex) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler({EmailAlreadyExistsException.class, PhoneNumberAlreadyExistsException.class})
     public ResponseEntity<ApiResponse<Void>> handleAlreadyExistsExceptions(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)

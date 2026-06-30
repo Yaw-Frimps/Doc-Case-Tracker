@@ -82,20 +82,18 @@ public interface CaseTestRepository extends JpaRepository<CaseTest, String> {
 """)
     Long countTestsForYear(int year);
 
+    boolean existsByTest_Id(String testId);
 
     @Query("""
     SELECT c.doctor.doctorId AS doctorId,
            c.doctor.fullName AS doctorName,
            COUNT(DISTINCT c.id) AS totalCases,
-           (
-               SELECT COUNT(ct.id)
-               FROM CaseTest ct
-               WHERE ct.cases.doctor.doctorId = c.doctor.doctorId
-           ) AS totalTests
+           COUNT(ct.id) AS totalTests
     FROM Cases c
+    JOIN c.caseTests ct
     WHERE c.deleted = false
     GROUP BY c.doctor.doctorId, c.doctor.fullName
     ORDER BY totalTests DESC
-""")
+    """)
     List<TopDoctorProjection> findTopDoctorsWithCasesAndTests(Pageable pageable);
 }

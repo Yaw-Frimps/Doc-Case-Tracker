@@ -9,6 +9,8 @@ import org.codewithzea.doccasetracker.dto.request.UpdateTestRequest;
 import org.codewithzea.doccasetracker.dto.response.ApiResponse;
 import org.codewithzea.doccasetracker.dto.response.TestResponse;
 import org.codewithzea.doccasetracker.service.TestService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -123,6 +125,18 @@ public class TestController {
                         "Test deactivated successfully",
                         response
                 )
+        );
+    }
+
+    @GetMapping("/inactive")
+    public ResponseEntity<ApiResponse<Page<TestResponse>>> getInactiveTests(
+            Pageable pageable
+    ) {
+
+        Page<TestResponse> response = service.getInactiveTests(pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Inactive tests retrieved successfully", response)
         );
     }
 }

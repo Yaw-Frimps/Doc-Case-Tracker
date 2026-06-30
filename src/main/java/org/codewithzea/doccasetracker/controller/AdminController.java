@@ -8,6 +8,8 @@ import org.codewithzea.doccasetracker.service.AdminService;
 import org.codewithzea.doccasetracker.service.AuditLogService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -37,21 +39,21 @@ public class AdminController {
 
     @GetMapping("/users")
     public ResponseEntity<ApiResponse<Page<ApprovalStatusResponse>>> getAllUsers(
-            Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ApprovalStatusResponse> response = adminService.getAllUsers(pageable);
         return ResponseEntity.ok(ApiResponse.success("Users successfully retrieved", response));
     }
 
     @GetMapping("/users/pending")
     public ResponseEntity<ApiResponse<Page<ApprovalStatusResponse>>> getPendingUsers(
-            Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ApprovalStatusResponse> response = adminService.getPendingUsers(pageable);
         return ResponseEntity.ok(ApiResponse.success("Pending users successfully retrieved", response));
     }
 
     @GetMapping("/users/approved")
     public ResponseEntity<ApiResponse<Page<ApprovalStatusResponse>>> getApprovedUsers(
-            Pageable pageable) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ApprovalStatusResponse> response = adminService.getApprovedUsers(pageable);
         return ResponseEntity.ok(ApiResponse.success("Approved users successfully retrieved", response));
     }
@@ -77,7 +79,7 @@ public class AdminController {
 
     @GetMapping("/audit-logs")
     public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogs(
-            Pageable pageable
+            @PageableDefault(sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable
     ) {
 
         Page<AuditLogResponse> response =
@@ -107,27 +109,10 @@ public class AdminController {
         );
     }
 
-//    @GetMapping("/audit-logs/user/{email}")
-//    public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogsByUser(
-//            @PathVariable String email,
-//            Pageable pageable
-//    ) {
-//
-//        Page<AuditLogResponse> response =
-//                auditLogService.getLogsByUser(email, pageable);
-//
-//        return ResponseEntity.ok(
-//                ApiResponse.success(
-//                        "User audit logs retrieved successfully",
-//                        response
-//                )
-//        );
-//    }
-
     @GetMapping("/audit-logs/user/{userId}")
     public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getLogsByUserId(
             @PathVariable String userId,
-            Pageable pageable
+            @PageableDefault(sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable
     ) {
 
         Page<AuditLogResponse> response =

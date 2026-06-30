@@ -20,7 +20,7 @@ public class CaseResponse {
 
     private String patientName;
 
-    private List<TestResponse> tests;
+    private List<CaseTestResponse> tests;
 
     private LocalDateTime createdAt;
 

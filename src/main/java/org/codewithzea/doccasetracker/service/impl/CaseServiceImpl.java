@@ -168,7 +168,6 @@ public class CaseServiceImpl implements CaseService {
 
         caseRepository.save(cases);
 
-        // 👇 AUDIT LOG
         User admin = userProvider.getCurrentUser();
 
         auditLogService.log(
@@ -187,10 +186,21 @@ public class CaseServiceImpl implements CaseService {
 
     private List<Test> getTests(List<String> testIds) {
 
-        List<Test> tests = testRepository.findAllById(testIds);
+        List<Test> tests = testRepository.findByIdInAndActiveTrue(testIds);
 
         if (tests.size() != testIds.size()) {
             throw new ResourceNotFoundException("One or more tests not found");
+        }
+
+        List<String> inactiveTests = tests.stream()
+                .filter(t -> !t.isActive())
+                .map(Test::getTestName)
+                .toList();
+
+        if (!inactiveTests.isEmpty()) {
+            throw new IllegalStateException(
+                    "These tests are inactive and cannot be used: " + inactiveTests
+            );
         }
 
         return tests;

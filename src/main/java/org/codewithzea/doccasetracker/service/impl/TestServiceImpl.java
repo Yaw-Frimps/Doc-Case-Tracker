@@ -9,6 +9,7 @@ import org.codewithzea.doccasetracker.entity.Test;
 import org.codewithzea.doccasetracker.entity.User;
 import org.codewithzea.doccasetracker.exception.ResourceNotFoundException;
 import org.codewithzea.doccasetracker.mapper.TestMapper;
+import org.codewithzea.doccasetracker.repository.CaseTestRepository;
 import org.codewithzea.doccasetracker.repository.TestRepository;
 import org.codewithzea.doccasetracker.service.AuditLogService;
 import org.codewithzea.doccasetracker.service.TestService;
@@ -16,9 +17,11 @@ import org.codewithzea.doccasetracker.util.AuditActions;
 import org.codewithzea.doccasetracker.util.AuthenticatedUserProvider;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Service
@@ -28,6 +31,7 @@ import java.util.List;
 public class TestServiceImpl implements TestService {
     private final AuthenticatedUserProvider userProvider;
     private final AuditLogService auditLogService;
+    private final CaseTestRepository caseTestRepository;
 
     public static final String TEST_CACHE = "test";
     public static final String TESTS_CACHE = "tests";
@@ -58,7 +62,7 @@ public class TestServiceImpl implements TestService {
         User admin = userProvider.getCurrentUser();
 
         auditLogService.log(
-                AuditActions.TEST_CREATED, // or TEST_CREATED if you add it
+                AuditActions.TEST_CREATED,
                 "TEST",
                 saved.getId(),
                 "Test created: " + saved.getTestName(),
@@ -77,9 +81,9 @@ public class TestServiceImpl implements TestService {
     @Cacheable(value = TESTS_CACHE)
     public List<TestResponse> getAll() {
 
-        log.debug("Fetching all tests");
+        log.debug("Fetching all active tests");
 
-        return repository.findAll()
+        return repository.findByActiveTrue()
                 .stream()
                 .map(mapper::toDTO)
                 .toList();
@@ -126,6 +130,8 @@ public class TestServiceImpl implements TestService {
         return mapper.toDTO(updated);
     }
 
+
+
     @Override
     @CacheEvict(value = {TEST_CACHE, TESTS_CACHE}, allEntries = true)
     public void delete(String id) {
@@ -133,6 +139,12 @@ public class TestServiceImpl implements TestService {
         log.debug("Deleting test {}", id);
 
         Test test = findTestOrThrow(id);
+
+        if (caseTestRepository.existsByTest_Id(id)) {
+            throw new IllegalStateException(
+                    "This test has already been used in one or more cases. Please deactivate it instead."
+            );
+        }
 
         repository.delete(test);
 
@@ -149,6 +161,14 @@ public class TestServiceImpl implements TestService {
         );
 
         log.info("Test deleted successfully: {}", id);
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<TestResponse> getInactiveTests(Pageable pageable) {
+        return repository.findByActiveFalse(pageable)
+                .map(mapper::toDTO);
     }
 
     @Override
